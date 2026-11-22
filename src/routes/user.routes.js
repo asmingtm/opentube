@@ -21,5 +21,5 @@ userRouter.route("/token/refresh").post(refreshUserAccessToken);
 /* Updater routes */
 userRouter.route("/update/details").post(verifyJWT, updateUserDetails);
 userRouter.route("/update/password").post(verifyJWT, updateUserPassword);
-userRouter.route("/update/avatar").post(verifyJWT, updateUserAvatar);
-userRouter.route("/update/cover").post(verifyJWT, updateUserCover);
+userRouter.route("/update/avatar").post(verifyJWT, upload.single("avatar"), updateUserAvatar);
+userRouter.route("/update/cover").post(verifyJWT, upload.single("cover"), updateUserCover);

@@ -207,8 +207,8 @@ export const updateUserCover = asyncHandler(async (req, res) => {
     }
 
     const cover = await uploadToCloudinary(coverLocalPath, CLOUDINARY_FOLDER.USER_COVER);
-    if(!cover || cover?.url){
-        throw new ApiError(500, "Error occured while uploading file to cloudinary");
+    if(!cover || !cover?.url){
+        throw new ApiError(500, "Error occured while uploading file to cloudinary:");
     }
 
     User.findByIdAndUpdate(req.user?._id, {
@@ -217,5 +217,5 @@ export const updateUserCover = asyncHandler(async (req, res) => {
         }
     }).select("-password");
 
-    res.status(200).json(new ApiResponse(201, { cover: { url: cover } }, "Cover image updated sucessfully"));
+    res.status(200).json(new ApiResponse(201, { cover: { url: cover.url } }, "Cover image updated sucessfully"));
 });
