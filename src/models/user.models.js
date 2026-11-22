@@ -27,9 +27,8 @@ const userSchemaDefinition = {
     },
     avatar: {
         type: String, // Cloudinary's URL
-        required: [true, "user avatar is required"],
     },
-    coverImage: {
+    cover: {
         type: String, // Cloudinary's URL
     },
     watchHistory: [

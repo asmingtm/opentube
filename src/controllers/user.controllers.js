@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { User } from "#models";
-import { REFRESH_TOKEN_SECRET } from "#consts";
+import { CLOUDINARY_FOLDER, COOKIE_OPTIONS, REFRESH_TOKEN_SECRET } from "#consts";
 import { uploadToCloudinary } from "#services";
 import { asyncHandler, ApiError, ApiResponse } from "#utils";
 
@@ -15,36 +15,14 @@ export const registerUser = asyncHandler(async (req, res) => {
 
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
 
-    console.log("TEST | existingUser:", existingUser);
-
     if(existingUser){
         throw new ApiError(400, "User already exists!");
     }
 
-    console.log("TEST | req.files:", req.files);
-
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-    let coverImageLocalPath;
-
-    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
-        coverImageLocalPath = req.files.coverImage[0].path;
-    }
-
-    if(!avatarLocalPath){
-        throw new ApiError(400, "Avatar file is required!");
-    }
-
-    const avatar = await uploadToCloudinary(avatarLocalPath);
-    const coverImage = coverImageLocalPath ? await uploadToCloudinary(coverImageLocalPath) : null;
-
-    if(!avatar){
-        throw new ApiError("Failed to push avatar to cloudinary!");
-    }
-
     const newUser = await User.create({
         fullName,
-        avatar: avatar.url,
-        coverImage: coverImage?.url || "",
+        avatar: "",
+        cover: "",
         username: username.toLowerCase(),
         email,
         password,
@@ -59,22 +37,16 @@ export const registerUser = asyncHandler(async (req, res) => {
 });
 
 export const loginUser = asyncHandler(async (req, res) => {
-    console.log("recived request:", req.body);
-
     const { username, email, password } = req.body;
 
     if(!username && !email){
         throw new ApiError(400, "Username or Email is required!")
     }
 
-    console.log("username and email were provided:", username, email);
-
     const foundUser = await User.findOne({ $or: [{username}, {email}] }); // issue here
     if(!foundUser){
         throw new ApiError(404, "User not found!");
     }
-
-    console.log("found user:", foundUser);
 
     const isPasswordCorrect = await foundUser.isPasswordCorrect(password);
     if(!isPasswordCorrect){
@@ -86,8 +58,8 @@ export const loginUser = asyncHandler(async (req, res) => {
     const loggedInUser = await User.findById(foundUser._id).select("-password -refreshToken");
 
     return res.status(200)
-    .cookie("accessToken", accessToken, cookieOptions)
-    .cookie("refreshToken", refreshToken, cookieOptions)
+    .cookie("accessToken", accessToken, COOKIE_OPTIONS)
+    .cookie("refreshToken", refreshToken, COOKIE_OPTIONS)
     .json(new ApiResponse(200, {
         user: loggedInUser,
         accessToken,
@@ -103,8 +75,8 @@ export const logoutUser = asyncHandler(async (req, res) => {
     });
 
     return res.status(200)
-    .clearCookie("accessToken", cookieOptions)
-    .clearCookie("refreshToken", cookieOptions)
+    .clearCookie("accessToken", COOKIE_OPTIONS)
+    .clearCookie("refreshToken", COOKIE_OPTIONS)
     .json(new ApiResponse(200, {}, "User logged our sucessfully!"));
 });
 
@@ -213,7 +185,7 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Avatar's file is missing..")
     }
 
-    const avatar = await uploadToCloudinary(avatarLocalPath);
+    const avatar = await uploadToCloudinary(avatarLocalPath, CLOUDINARY_FOLDER.USER_AVATAR);
     if(!avatar || !avatar.url){
         throw new ApiError(500, "Error while updating the avatar");
     }
@@ -227,23 +199,23 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(201, { avatar: { url: avatar.url } }, "Avatar updated sucessfully"))
 });
 
-export const updateUserCoverImage = asyncHandler(async (req, res) => {
+export const updateUserCover = asyncHandler(async (req, res) => {
     
-    const coverImageLocalPath = req.file?.path;
-    if(!coverImageLocalPath){
+    const coverLocalPath = req.file?.path;
+    if(!coverLocalPath){
         throw new ApiError(400, "Cover image's file is missing!");
     }
 
-    const coverImage = await uploadToCloudinary(coverImageLocalPath);
-    if(!coverImage || coverImage?.url){
+    const cover = await uploadToCloudinary(coverLocalPath, CLOUDINARY_FOLDER.USER_COVER);
+    if(!cover || cover?.url){
         throw new ApiError(500, "Error occured while uploading file to cloudinary");
     }
 
     User.findByIdAndUpdate(req.user?._id, {
         $set: {
-            coverImage: coverImage.url,
+            cover: cover.url,
         }
     }).select("-password");
 
-    res.status(200).json(new ApiResponse(201, { coverImage: { url: coverImage } }, "Cover image updated sucessfully"));
+    res.status(200).json(new ApiResponse(201, { cover: { url: cover } }, "Cover image updated sucessfully"));
 });

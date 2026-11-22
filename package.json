@@ -19,22 +19,40 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "node --watch src/index.js"
   },
   "imports": {
-    "#app": ["./src/app/index.js"],
-    "#consts": ["./src/consts/index.js"],
-    "#controllers": ["./src/controllers/index.js"],
-    "#db": ["./src/db/index.js"],
-    "#middlewares": ["./src/middlewares/index.js"],
-    "#models": ["./src/models/index.js"],
-    "#routes": ["./src/routes/index.js"],
-    "#services": ["./src/services/index.js"],
-    "#utils": ["./src/utils/index.js"]
+    "#app": [
+      "./src/app/index.js"
+    ],
+    "#consts": [
+      "./src/consts/index.js"
+    ],
+    "#controllers": [
+      "./src/controllers/index.js"
+    ],
+    "#db": [
+      "./src/db/index.js"
+    ],
+    "#middlewares": [
+      "./src/middlewares/index.js"
+    ],
+    "#models": [
+      "./src/models/index.js"
+    ],
+    "#routes": [
+      "./src/routes/index.js"
+    ],
+    "#services": [
+      "./src/services/index.js"
+    ],
+    "#utils": [
+      "./src/utils/index.js"
+    ]
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "nodemon": "^3.1.14",
+    "chalk": "^6.0.1",
     "prettier": "^3.9.10"
   },
   "dependencies": {
@@ -48,5 +66,8 @@
     "mongoose": "^9.11.4",
     "mongoose-aggregate-paginate-v2": "^1.1.5",
     "multer": "^2.5.0"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true
   }
 }

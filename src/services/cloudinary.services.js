@@ -8,15 +8,15 @@ cloudinary.config({
     api_secret: CLOUDINARY_API_SECRET,
 });
 
-export const uploadToCloudinary = async localFilePath => {
+export const uploadToCloudinary = async (localFilePath, cloudinaryFolderPath) => {
     try{
         if(!localFilePath) throw new Error("ERROR: File path was not provided!");
         // uploads the file from our server to cloudinary
         const res = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto",
+            folder: cloudinaryFolderPath,
         });
         // after the file is sucessfully uploaded
-        console.log("SUCESS: uploaded file on Cloudinary:", res);
         fs.unlinkSync(localFilePath);
         return res;
     }
@@ -25,7 +25,6 @@ export const uploadToCloudinary = async localFilePath => {
         if(localFilePath && fs.existsSync(localFilePath)){
             fs.unlinkSync(localFilePath); // removes the file from our server
         }
-        console.log(`INFO: removed the temporary file at "${localFilePath}" from server`);
         return null;
     }
 }
