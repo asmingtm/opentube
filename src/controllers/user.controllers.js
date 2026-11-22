@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { User } from "#models";
 import { CLOUDINARY_FOLDER, COOKIE_OPTIONS, REFRESH_TOKEN_SECRET } from "#consts";
-import { uploadToCloudinary } from "#services";
+import { deleteFromCloudinary, uploadToCloudinary } from "#services";
 import { asyncHandler, ApiError, ApiResponse } from "#utils";
 
 // Basic user controls for their account.
@@ -21,8 +21,6 @@ export const registerUser = asyncHandler(async (req, res) => {
 
     const newUser = await User.create({
         fullName,
-        avatar: "",
-        cover: "",
         username: username.toLowerCase(),
         email,
         password,
@@ -190,11 +188,21 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Error while updating the avatar");
     }
     
-    await User.findByIdAndUpdate(req.user?._id, {
+    const oldUser = await User.findByIdAndUpdate(req.user?._id, {
         $set: {
-            avatar: avatar.url,
+            "avatar.url": avatar.url,
+            "avatar.public_id": avatar.public_id,
         }
     }).select("-password");
+
+    if(oldUser.avatar?.public_id){
+        try{
+            await deleteFromCloudinary(oldUser.avatar?.public_id);
+        }
+        catch(err){
+            console.error("Error while deleting old url:", err);
+        }
+    }
 
     res.status(200).json(new ApiResponse(201, { avatar: { url: avatar.url } }, "Avatar updated sucessfully"))
 });
@@ -211,11 +219,21 @@ export const updateUserCover = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Error occured while uploading file to cloudinary:");
     }
 
-    User.findByIdAndUpdate(req.user?._id, {
+    const oldUser = await User.findByIdAndUpdate(req.user?._id, {
         $set: {
-            cover: cover.url,
+            "cover.url": cover.url,
+            "cover.public_id": cover.public_id,
         }
     }).select("-password");
+
+    if(oldUser.cover?.public_id){
+        try{
+            await deleteFromCloudinary(oldUser.cover.public_id);
+        }
+        catch(err){
+            console.error(err);
+        }
+    }
 
     res.status(200).json(new ApiResponse(201, { cover: { url: cover.url } }, "Cover image updated sucessfully"));
 });

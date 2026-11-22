@@ -8,12 +8,21 @@ cloudinary.config({
     api_secret: CLOUDINARY_API_SECRET,
 });
 
+export const deleteFromCloudinary = async (cloudinaryFilePublicId) => {
+    const result = await cloudinary.uploader.destroy(cloudinaryFilePublicId, {
+        resource_type: "image",
+        invalidate: true,
+    });
+
+    return result;
+}
+
 export const uploadToCloudinary = async (localFilePath, cloudinaryFolderPath) => {
     try{
         if(!localFilePath) throw new Error("ERROR: File path was not provided!");
         // uploads the file from our server to cloudinary
         const res = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto",
+            resource_type: "image",
             folder: cloudinaryFolderPath,
         });
         // after the file is sucessfully uploaded

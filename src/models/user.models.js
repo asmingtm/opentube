@@ -26,10 +26,12 @@ const userSchemaDefinition = {
         index: true,
     },
     avatar: {
-        type: String, // Cloudinary's URL
+        url: String,
+        public_id: String,
     },
     cover: {
-        type: String, // Cloudinary's URL
+        url: String,
+        public_id: String,
     },
     watchHistory: [
         {
