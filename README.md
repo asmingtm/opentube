@@ -7,3 +7,6 @@ Sources & stored informations
 - [Algorithms and instructions](./docs/algorithm.md)
 - [Refrence for models](https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj)
 - [Legacy codes](./docs/legacy.md)
+
+## Features
+Upload videos, tweets, saved history, accounts, likes, comments etc.
