@@ -1,4 +1,4 @@
-`Private`
+`Template`
 # OpenTube
 An industry ready backend for a Youtube & Twitter/X hybrid application made with `express` and completely open source.
 
